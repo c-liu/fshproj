@@ -1,4 +1,3 @@
-// Primary author: Eric
 var express = require('express');
 var router = express.Router();
 var Annotation = require("../models/annotation");

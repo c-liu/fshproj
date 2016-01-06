@@ -1,4 +1,3 @@
-//primary author : Catherine
 var mongoose = require("mongoose");
 var uniqueValidator = require('mongoose-unique-validator');
 

@@ -1,4 +1,3 @@
-// Primary author: Eric
 var mongoose = require("mongoose");
 
 var annotationSchema = mongoose.Schema({

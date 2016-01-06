@@ -1,10 +1,4 @@
-Mappy
-=====
-
-6.170 Project 4
-
-nayeonk - catliu - aanojima - eschmidt - 2014
-
-Deployed at http://mappy-proj4.rhcloud.com/
-
-To run the tests, user mappyteam@gmail.com must be in the database. Tests can be seen at http://mappy-proj4.rhcloud.com/test
+To run:
+	1. run 'npm install' to get the node modules
+	2. run 'node app.js' to start the server
+	3. navigate in your browser to localhost:8000 to see the website

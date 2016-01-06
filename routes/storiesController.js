@@ -1,4 +1,3 @@
-//primary author : Catherine
 var express = require('express');
 var router = express.Router();
 var Story = require("../models/story")
