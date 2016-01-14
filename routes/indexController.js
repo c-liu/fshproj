@@ -107,7 +107,6 @@ router.post('/signup', function(req,res) {
                 town: "Cambridge",
                 display : true
             })
-            console.log('making new user', req, req.body)
             var newUser = new Account({
                 email : req.body.email, // required
                 location : req.body.location || defaultDOB, // required
