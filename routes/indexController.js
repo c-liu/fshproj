@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
-var Account = require("../models/account");
+var accountExports = require("../models/account");
+var Account = accountExports.Account;
+var Name = accountExports.Name;
+var Location = accountExports.Location;
+var DOB = accountExports.DOB;
 var handleError = require('./utils.js').handleError;
 
 var google = require("googleapis");
