@@ -1,4 +1,35 @@
 var mongoose = require("mongoose");
+var uniqueValidator = require('mongoose-unique-validator');
+
+var nameSchema = mongoose.Schema ({
+	first: {
+	    type: String, 
+	    required: true
+	},
+	last: { 
+	    type: String,
+	    required: true
+	},
+	display: Boolean
+});
+
+var Name = mongoose.model("Name", nameSchema);
+
+var locationSchema = mongoose.Schema ({
+	country: String,
+	state: String,//if applicable?
+	town: String,	
+	display: Boolean, 
+});
+
+var Location = mongoose.model("Location", locationSchema);
+
+var dobSchema = mongoose.Schema({
+	dateofbirth: Date,
+	display: Boolean,
+});
+
+var DOB = mongoose.model("DOB", dobSchema);
 
 var accountSchema = mongoose.Schema({
     email: {
@@ -8,27 +39,13 @@ var accountSchema = mongoose.Schema({
 		unique: true
     },
     password : {type: String},
-    name: {
-		first: {
-		    type: String, 
-		    required: true
-		},
-		last: { 
-		    type: String,
-		    required: true
-		},
-		display: Boolean
-    },
+    name: {type: mongoose.Schema.Types.ObjectId, ref: "Name"},
     location: {
-		country: String,
-		state: String,//if applicable?
-		town: String
-		display: Boolean, 
+		type: mongoose.Schema.Types.ObjectId, ref: "Location",
 		required: true
     },
-    dob: { 
-		dateofbirth: Date,
-		display: Boolean,
+    dob: {
+    	type: mongoose.Schema.Types.ObjectId, ref: "DOB",
 		required: true	// required since people have to be above 13 to give personal info, or we need a privacy policy or something
     },
     image: String,	//URL to the image
@@ -49,4 +66,4 @@ var accountSchema = mongoose.Schema({
 accountSchema.plugin(uniqueValidator);
 var Account = mongoose.model("Account", accountSchema);
 
-module.exports = Account;
+module.exports = {'Account': Account, 'Name': Name, 'Location': Location, 'DOB': DOB};
