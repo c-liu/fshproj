@@ -1,6 +1,6 @@
 {
-  "name": "Mappy",
-  "description": "6.170 Project 4 - Map annotation system for recording geolocated posts",
+  "name": "FSH_Website",
+  "description": "...",
   "scripts": {
     "start": "node app.js"
   },

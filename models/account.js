@@ -1,7 +1,7 @@
 var mongoose = require("mongoose");
 
 var accountSchema = mongoose.Schema({
-    username: {
+    email: {
 		type: String, 
 		display: Boolean,
 		required: true,
@@ -41,7 +41,7 @@ var accountSchema = mongoose.Schema({
 	    default: false 
     },
     isAdmin: {
-		type: Boolean, 
+		type: Boolean,
 	    default: false 
     }
 });

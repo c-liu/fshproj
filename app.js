@@ -17,9 +17,9 @@ var app = express();
 app.set("environment", "development");
 
 // Setup mongoose
-var connectionString = "localhost:27017/mappy";
+var connectionString = "localhost:27017/fsh";
 if(process.env.OPENSHIFT_MONGODB_DB_URL) {
-    connectionString = process.env.OPENSHIFT_MONGODB_DB_URL + "mappy";
+    connectionString = process.env.OPENSHIFT_MONGODB_DB_URL + "fsh";
 }
 mongoose.connect(connectionString);
 
@@ -32,7 +32,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     unset: "destroy",
-    secret: "sicknastyswagmappy"
+    secret: "sicknastyswagfsh"
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -81,5 +81,5 @@ app.use(function(err, req, res, next) {
 
 // Start app
 app.listen(process.env.OPENSHIFT_NODEJS_PORT || 8000, process.env.OPENSHIFT_NODEJS_IP || "localhost", function() {
-    console.log("Mappy server running on port "+(process.env.OPENSHIFT_NODEJS_PORT || 8000)+"...");
+    console.log("FSH server running on port "+(process.env.OPENSHIFT_NODEJS_PORT || 8000)+"...");
 });
