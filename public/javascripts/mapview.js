@@ -40,19 +40,19 @@ var MapView = function(){
 	 * and adds annotation to map view
 	 */
 	self.loadPublicAnnotations = function(){
-		$.ajax({
-			type : "GET",
-			url : "/annotations",
-			success : function(annotations){
-				for (var i in annotations){
-					var model = annotations[i];
-					self.addAnnotation(model);
-				}
-			},
-			error : function(error){
-				console.log(error);
-			}
-		});
+		// $.ajax({
+		// 	type : "GET",
+		// 	url : "/annotations",
+		// 	success : function(annotations){
+		// 		for (var i in annotations){
+		// 			var model = annotations[i];
+		// 			self.addAnnotation(model);
+		// 		}
+		// 	},
+		// 	error : function(error){
+		// 		console.log(error);
+		// 	}
+		// });
 	}
 
 	/* loadUserAnnotations [PUBLIC]

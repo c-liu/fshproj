@@ -17,11 +17,12 @@ var oauth2Client = new OAuth2('1074513880769-6apcnkv996u3ci9ir76imhhgm2uft5on.ap
 
 // GET /
 // The homepage
+// Response: HTML for homepage
 router.get("/", function(req, res) {
+    var defaultName = new Name({'first': 'Guest', 'last': 'McGuest', 'display': true});
     if (!req.session.user){
         req.session.user = {
-            firstName: "Guest",
-            lastName: "McGuest"
+            name: defaultName
         };
     }
     if (!req.session.story){
@@ -97,17 +98,19 @@ router.post('/signup', function(req,res) {
             res.json({ error: "Error: An account already exists with this email address" });
         } else {
             var newUser = new User({
-                email : req.body.email,
-                password : req.body.password,
-                name : req.body.name,
-                location : req.body.location,
-                dob : req.body.dob,
-                image : req.body.image,
-                impairment : req.body.impairment,
-                sex : req.body.sex,
-                hobbies : req.body.hobbies,
-                description : req.body.description
+                email : req.body.email, // required
+                location : req.body.location, // required
+                dob : req.body.dob, // required
             });
+
+            if(req.body.password) newUser.password = req.body.password;
+            if(req.body.name) newUser.name = req.body.name;
+            if(req.body.image) newUser.image = req.body.image;
+            if(req.body.impairment) newUser.impairment = req.body.impairment;
+            if(req.body.sex) newUser.sex = req.body.sex;
+            if(req.body.hobbies) newUser.hobbies = req.body.hobbies;
+            if(req.body.description) newUser.description = req.body.description;
+
             newUser.save(function(err, user) {
                 if (err) return handleError(res, 500, err.message);
                 req.session.user = user;
