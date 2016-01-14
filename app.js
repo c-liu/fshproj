@@ -6,11 +6,11 @@ var session = require("express-session");
 
 // Define controllers
 var index = require("./routes/indexController");
-var users = require("./routes/usersController");
-var annotations = require("./routes/annotationsController");
-var stories = require("./routes/storiesController");
+var accounts = require("./routes/accountController");
+var events = require("./routes/eventController");
+var resources = require("./routes/resourceController");
 
-var User = require("./models/user");
+var Account = require("./models/account");
 
 // Create app
 var app = express();
@@ -41,9 +41,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "/public")));
 
 // Set up routes
-app.use("/users", users);
-app.use("/annotations", annotations);
-app.use("/stories", stories);
+app.use("/accounts", accounts);
+app.use("/events", events);
+app.use("/resources", resources);
 app.use("/", index);
 
 // Error Handlers
