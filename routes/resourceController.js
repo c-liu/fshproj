@@ -17,10 +17,10 @@ router.use(function(req, res, next) {
 // Gets all approved resources. Restricts them to the given area if request body is specified.
 router.get("/", function(req, res) {
     Resource.find({ approval: true })
-    .where("latitude").gt(req.body.minLatitude || -90)
-    .where("latitude").lt(req.body.maxLatitude || 90)
-    .where("longitude").gt(req.body.minLongitude || -180)
-    .where("longitude").lt(req.body.maxLongitude || 180)
+    // .where("latitude").gt(req.body.minLatitude || -90)
+    // .where("latitude").lt(req.body.maxLatitude || 90)
+    // .where("longitude").gt(req.body.minLongitude || -180)
+    // .where("longitude").lt(req.body.maxLongitude || 180)
     .populate("owner", "name")
     .exec(function(err, resources) {
         if(err) {

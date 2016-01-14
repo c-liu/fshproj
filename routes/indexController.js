@@ -97,10 +97,21 @@ router.post('/signup', function(req,res) {
         else if(user) {
             res.json({ error: "Error: An account already exists with this email address" });
         } else {
-            var newUser = new User({
+            var defaultDOB = new DOB({
+                dob: new Date(), 
+                display : true
+            })
+            var defaultLocation= new Location({
+                country: 'USA',
+                state: "MA",
+                town: "Cambridge",
+                display : true
+            })
+            console.log('making new user', req, req.body)
+            var newUser = new Account({
                 email : req.body.email, // required
-                location : req.body.location, // required
-                dob : req.body.dob, // required
+                location : req.body.location || defaultDOB, // required
+                dob : req.body.dob || defaultLocation // required
             });
 
             if(req.body.password) newUser.password = req.body.password;
