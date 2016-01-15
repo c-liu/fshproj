@@ -1,3 +1,4 @@
+var crypto = require('crypto')
 var express = require('express');
 var router = express.Router();
 var accountExports = require("../models/account");
@@ -43,11 +44,15 @@ router.get("/", function(req, res) {
 // Request body: { email: String, password: String }
 // Attempts to log in with the given credentials. Responds with { success: true } if successful or { error: String } otherwise.
 router.post('/login', function(req, res) {
-    Account.findOne({ email: req.body.email, password: req.body.password})
-    .select("email firstName lastName isAdmin")
+    var encrypted_password = crypto.createHash('md5')
+                    .update(req.body.password)
+                    .digest('hex');
+    Account.findOne({ email: req.body.email, password: encrypted_password})
+    .select("email firstName lastName isAdmin") // TODO: Figure out if you want more fields?
     .exec(function(err, user) {
         if(err) handleError(res, 500, err.message);
         else if(user) {
+            delete user['password'];
             req.session.user = user;
             req.session.save();
             res.json({success: true, user: user});
@@ -113,7 +118,12 @@ router.post('/signup', function(req,res) {
                 dob : req.body.dob || defaultLocation // required
             });
 
-            if(req.body.password) newUser.password = req.body.password;
+            if(req.body.password) {
+                // store a hashed password
+                newUser.password = crypto.createHash('md5')
+                    .update(req.body.password)
+                    .digest('hex');
+            }
             if(req.body.name) newUser.name = req.body.name;
             if(req.body.image) newUser.image = req.body.image;
             if(req.body.impairment) newUser.impairment = req.body.impairment;
@@ -123,8 +133,8 @@ router.post('/signup', function(req,res) {
 
             newUser.save(function(err, user) {
                 if (err) return handleError(res, 500, err.message);
+                delete user['password'];
                 req.session.user = user;
-                delete req.session.user.password;
                 req.session.save();
                 res.json({success: true, username: user});
             });
