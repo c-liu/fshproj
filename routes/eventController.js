@@ -2,6 +2,15 @@ var express = require('express');
 var router = express.Router();
 var Annotation = require("../models/annotation");
 
+
+// Require authentication for the rest of the actions
+router.use(function(req, res, next) {
+    if(req.session.user && req.session.user.approval) {
+        next();
+    } else {
+        res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
+    }
+});
 // GET /annotations
 // Request body (optional): { minLatitude: Number, maxLatitude: Number, minLongitude: Number, maxLongitude: Number }
 // Gets all public annotations. Restricts them to the given area if request body is specified.
@@ -21,15 +30,6 @@ router.get("/", function(req, res) {
             res.json({ error: "Error: No annotations found" });
         }
     });
-});
-
-// Require authentication for the rest of the actions
-router.use(function(req, res, next) {
-    if(req.session.user) {
-        next();
-    } else {
-        res.json({ error: "Error: You must be logged in to perform this action" });
-    }
 });
 
 // POST /annotations

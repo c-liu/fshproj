@@ -1,11 +1,7 @@
 var crypto = require('crypto')
 var express = require('express');
 var router = express.Router();
-var accountExports = require("../models/account");
-var Account = accountExports.Account;
-var Name = accountExports.Name;
-var Location = accountExports.Location;
-var DOB = accountExports.DOB;
+var Account = require("../models/account");
 var handleError = require('./utils.js').handleError;
 
 var google = require("googleapis");
@@ -20,10 +16,11 @@ var oauth2Client = new OAuth2('1074513880769-6apcnkv996u3ci9ir76imhhgm2uft5on.ap
 // The homepage
 // Response: HTML for homepage
 router.get("/", function(req, res) {
-    var defaultName = new Name({'first': 'Guest', 'last': 'McGuest', 'display': true});
     if (!req.session.user){
         req.session.user = {
-            name: defaultName
+            firstName: 'TempGuest',
+            lastName: 'Name',
+            displayName : false
         };
     }
     if (!req.session.story){
@@ -34,8 +31,8 @@ router.get("/", function(req, res) {
     res.render('map', {
         userId: req.session.user._id,
         userEmail: req.session.user.email,
-        firstName: req.session.user.name.first,
-        lastName: req.session.user.name.last
+        firstName: req.session.user.firstName,
+        lastName: req.session.user.lastName
     });
 });
 
@@ -48,11 +45,11 @@ router.post('/login', function(req, res) {
                     .update(req.body.password)
                     .digest('hex');
     Account.findOne({ email: req.body.email, password: encrypted_password})
-    .select("email firstName lastName isAdmin") // TODO: Figure out if you want more fields?
+    .select("-password") // TODO: Figure out if you want more fields?
     .exec(function(err, user) {
         if(err) handleError(res, 500, err.message);
         else if(user) {
-            delete user['password'];
+            // delete user['password'];
             req.session.user = user;
             req.session.save();
             res.json({success: true, user: user});
@@ -92,6 +89,41 @@ router.post('/login', function(req, res) {
         
 //     });
 // });
+/*
+email: {
+        type: String, 
+        display: Boolean,
+        required: true,
+        unique: true
+    },
+    password : {type: String},
+    // Name
+    firstName: {type: String, required: true},
+    lastName: {type: String, required: true},
+    displayName: {type: Boolean, required: true},
+    //Location
+    country: String,
+    state: String,//if applicable?
+    town: String,   
+    displayLocation: Boolean, 
+    //DOB
+    dob: Date,
+    displayDOB: Boolean,
+
+    image: String,  //URL to the image
+    impairment: String,
+    sex: String,
+    hobbies: String,
+    description: String,
+    approval: { 
+        type: Boolean, 
+        default: false 
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false 
+    }
+*/
 
 // POST /signup
 // Request body: { email: String, password: String, firstName: String, lastName: String, and all optional fields }
@@ -101,21 +133,16 @@ router.post('/signup', function(req,res) {
         if(err) handleError(res, 500, err.message);
         else if(user) {
             res.json({ error: "Error: An account already exists with this email address" });
-        } else {
-            var defaultDOB = new DOB({
-                dob: new Date(), 
-                display : true
-            })
-            var defaultLocation= new Location({
-                country: 'USA',
-                state: "MA",
-                town: "Cambridge",
-                display : true
-            })
+        } else {    
             var newUser = new Account({
+                // for easy testing, uncomment 2 lines below
+                // approval : true,    
+                // isAdmin : true,
+                firstName: "Test", //required
+                lastName: "Tester", //required
+                displayName: false, //required
                 email : req.body.email, // required
-                location : req.body.location || defaultDOB, // required
-                dob : req.body.dob || defaultLocation // required
+
             });
 
             if(req.body.password) {
@@ -124,7 +151,7 @@ router.post('/signup', function(req,res) {
                     .update(req.body.password)
                     .digest('hex');
             }
-            if(req.body.name) newUser.name = req.body.name;
+            // if(req.body.name) newUser.name = req.body.name;
             if(req.body.image) newUser.image = req.body.image;
             if(req.body.impairment) newUser.impairment = req.body.impairment;
             if(req.body.sex) newUser.sex = req.body.sex;

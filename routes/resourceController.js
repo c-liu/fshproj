@@ -5,10 +5,10 @@ var Resource = require("../models/resource");
 
 // Require authentication for the rest of the actions
 router.use(function(req, res, next) {
-    if(req.session.user) {
+    if(req.session.user && req.session.user.approval) {
         next();
     } else {
-        res.json({ error: "Error: You must be logged in to perform this action" });
+        res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
     }
 });
 
@@ -16,22 +16,28 @@ router.use(function(req, res, next) {
 // Request body (optional): { minLatitude: Number, maxLatitude: Number, minLongitude: Number, maxLongitude: Number }
 // Gets all approved resources. Restricts them to the given area if request body is specified.
 router.get("/", function(req, res) {
-    Resource.find({ approval: true })
+    var query = {approval: true};
+    if (req.session.user.isAdmin) {
+        //admin should be able to view all resources regardless of approval status
+        query = {}
+    }
+
+    Resource.find(query)
     // .where("latitude").gt(req.body.minLatitude || -90)
     // .where("latitude").lt(req.body.maxLatitude || 90)
     // .where("longitude").gt(req.body.minLongitude || -180)
     // .where("longitude").lt(req.body.maxLongitude || 180)
-    .populate("owner", "name")
+    .populate("owner", 'firstName lastName displayName')  //name has display settings to determine whether or not to strip it out
     .exec(function(err, resources) {
         if(err) {
             res.json({ error: err.message });
         } else if(resources) {
-            for ( resource in resources) {
-                if (! resource.owner.name.display) {
-                    resource.owner.name.first = 'Anonymous'
-                    resource.owner.name.last = 'Poster'
+            resources.forEach(function (resource) {
+                if (!resource.owner.displayName && !req.session.user.isAdmin) {
+                    resource.owner.firstName = 'Anonymous'
+                    resource.owner.lastName = 'Poster'
                 }
-            }
+            });
             res.json(resources);
         } else {
             res.json({ error: "Error: No resources found" });
@@ -40,20 +46,24 @@ router.get("/", function(req, res) {
 });
 
 // POST /resources
-// Request body: { title: String, latitude: Number, longitude: Number, text: String, image: Base64, public: Boolean, storyId: ObjectId }
+// Request body:
+    /*
+    name: {type: String, required: true},
+    location: {type: String, required: true},
+    description: String,
+    image: String
+    */
 // Creates a new resource as the currently logged-in user. Responds with { success: true, id: ObjectId } upon success, and with { error: String } otherwise.
 router.post("/", function(req, res) {
+
     var resource = new Resource({
-        author: req.session.user._id,
-        title: req.body.title,
-        timestamp: new Date(),
-        latitude: req.body.latitude,
-        longitude: req.body.longitude,
-        text: req.body.text,
+        owner: req.session.user._id,
+        name: req.body.name,
+        location: req.body.location,
+        description: req.body.description,
         image: req.body.image || "",
-        public: req.body.public
+        approval: req.session.user.isAdmin || false
     });
-    if(req.body.storyId) annotation.story = req.body.storyId;
     resource.save(function(err, savedResource) {
         if(err) {
             res.json({ error: err.message });
