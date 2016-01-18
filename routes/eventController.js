@@ -1,77 +1,99 @@
 var express = require('express');
 var router = express.Router();
-var Annotation = require("../models/annotation");
+var Event = require("../models/event");
 
 
 // Require authentication for the rest of the actions
 router.use(function(req, res, next) {
-    if(req.session.user && req.session.user.approval) {
+    if(req.session.user && req.session.user.approval && !req.user.deleted) {
         next();
     } else {
         res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
     }
 });
-// GET /annotations
+
+// GET /events
 // Request body (optional): { minLatitude: Number, maxLatitude: Number, minLongitude: Number, maxLongitude: Number }
-// Gets all public annotations. Restricts them to the given area if request body is specified.
+// Gets all approved events. Restricts them to the given area if request body is specified.
 router.get("/", function(req, res) {
-    Annotation.find({ public: true })
-    .where("latitude").gt(req.body.minLatitude || -90)
-    .where("latitude").lt(req.body.maxLatitude || 90)
-    .where("longitude").gt(req.body.minLongitude || -180)
-    .where("longitude").lt(req.body.maxLongitude || 180)
-    .populate("author", "-password")
-    .exec(function(err, annotations) {
-        if(err) {
-            res.json({ error: err.message });
-        } else if(annotations) {
-            res.json(annotations);
-        } else {
-            res.json({ error: "Error: No annotations found" });
-        }
-    });
-});
-
-// POST /annotations
-// Request body: { title: String, latitude: Number, longitude: Number, text: String, image: Base64, public: Boolean, storyId: ObjectId }
-// Creates a new annotation as the currently logged-in user. Responds with { success: true, id: ObjectId } upon success, and with { error: String } otherwise.
-router.post("/", function(req, res) {
-    var annotation = new Annotation({
-        author: req.session.user._id,
-        title: req.body.title,
-        timestamp: new Date(),
-        latitude: req.body.latitude,
-        longitude: req.body.longitude,
-        text: req.body.text,
-        image: req.body.image || "",
-        public: req.body.public
-    });
-    if(req.body.storyId) annotation.story = req.body.storyId;
-    annotation.save(function(err, savedAnnotation) {
-        if(err) {
-            res.json({ error: err.message });
-        } else {
-            res.json({ success: true, id: savedAnnotation._id });
-        }
-    });
-});
-
-// PUT /annotations/<id>
-// Request body: { title: String, text: String, image: Base64, public: Boolean, storyId: ObjectId }
-// Updates an annotation, so long as it belongs to the currently logged-in user.
-router.put("/:id", function(req, res) {
-    Annotation.findOne({ _id: req.params.id, author: req.session.user._id }, function(err, annotation) {
-        if(err) {
-            res.json({ error: err.message });
-        } else if(annotation) {
-            annotation.title = req.body.title || annotation.title;
-            annotation.text = req.body.text || annotation.text;
-            annotation.image = req.body.image || annotation.image;
-            if(req.body.storyId) annotation.story = req.body.storyId;
-            if(typeof(req.body.public) != "undefined") {
-                annotation.public = req.body.public;
+    var query = {approval: true};
+    Event.find(query)
+    //.where("latitude").gt(req.body.minLatitude || -90)
+    //.where("latitude").lt(req.body.maxLatitude || 90)
+    //.where("longitude").gt(req.body.minLongitude || -180)
+    //.where("longitude").lt(req.body.maxLongitude || 180)
+	.populate("owner", "firstName lastName displayName")
+	.exec(function(err, resources) {
+            if(err) {
+		res.json({ error: err.message });
+            } else if(events) {
+		events.forEach(function (resource) {
+                    if (!event.owner.displayName && !req.session.user.isAdmin) {
+			event.owner.firstName = 'Anonymous'
+			event.owner.lastName = 'Poster'
+                    }
+		});
+		res.json(resources);
+            } else {
+		res.json({ error: "Error: No resources found" });
             }
-            annotation.save(function(err) {
+	});
+});
+/* POST /events
+Request body: 
+   name: {type: String, required: true},
+   dateofevent: {type: Date, required: true},
+   location: {type: String, required: true},
+   description: String,
+   image: String,
+   approval: {type: Boolean, default: false, required: true}
+
+Creates a new event as the currently logged-in user. Responds with { success: true, id: ObjectId } upon success, and with { error: String } otherwise.
+*/
+router.post("/", function(req, res) {
+    var event = new Event({
+        owner: req.session.user._id,
+        name: req.body.name,
+        dateofevent: req.body.dateofevent,
+        location: req.body.location,
+        description: req.body.description,
+        image: req.body.image || "",
+        approval: req.session.user.isAdmin || false
+    });
+    event.save(function(err, savedEvent) {
+        if(err) {
+            res.json({ error: err.message });
+        } else {
+            res.json({ success: true, id: savedEvent._id });
+        }
+    });
+});
+
+/* PUT /events/<id>
+Request body: 
+   name: {type: String, required: true},
+   dateofevent: {type: Date, required: true},
+   location: {type: String, required: true},
+   description: String,
+   image: String,
+   approval: {type: Boolean, default: false, required: true}
+
+Updates an event, so long as it belongs to the currently logged-in user.
+*/
+
+router.put("/:id", function(req, res) {
+    Event.findOne({ _id: req.params.id, author: req.session.user._id }, function(err, event) {
+        if(err) {
+            res.json({ error: err.message });
+        } else if(event) {
+            event.name = req.body.name || event.name;
+            event.dateofevent = req.body.dateofevent || event.dateofevent;
+	    event.description = req.body.description || event.description;
+	    event.location = req.body.location || event.location;
+	    event.approval = false;
+            event.image = req.body.image || event.image;
+  
+            event.save(function(err) {
                 if(err) {
                     res.json({ error: err.message });
                 } else {
@@ -79,25 +101,25 @@ router.put("/:id", function(req, res) {
                 }
             });
         } else {
-            res.json({ error: "Error: You do not have permission to edit this annotation" });
+            res.json({ error: "Error: You do not have permission to edit this event!" });
         }
     });
 });
 
-// DELETE /annotations/<id>
-// Deletes the annotation with the given id, so long as it belongs to the currently logged-in user.
+// DELETE /events/<id>
+// Deletes the event with the given id, so long as it belongs to the currently logged-in user.
 router.delete("/:id", function(req, res) {
-    Annotation.findOne({ _id: req.params.id, author: req.session.user._id })
-    .remove()
-    .exec(function(err, num) {
-        if(err) {
-            res.json({ error: err.message });
-        } else if(num > 0) {
-            res.json({ success: true });
-        } else {
-            res.json({ error: "Error: You do not have permission to edit this annotation" });
-        }
-    });
+    Event.findOne({ _id: req.params.id, author: req.session.user._id })
+	.remove()
+	.exec(function(err, num) {
+            if(err) {
+		res.json({ error: err.message });
+            } else if(num > 0) {
+		res.json({ success: true });
+            } else {
+		res.json({ error: "Error: You do not have permission to edit this event!" });
+            }
+	});
 });
 
 module.exports = router;
