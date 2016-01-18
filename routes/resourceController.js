@@ -5,8 +5,7 @@ var Resource = require("../models/resource");
 
 // Require authentication for the rest of the actions
 router.use(function(req, res, next) {
-    if(req.session.user && req.session.user.approval && !req.user.deleted) {
-        console.log("not deleted user");
+    if(req.session.user && req.session.user.approval && !req.session.user.deleted) {
         next();
     } else {
         res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
@@ -30,10 +29,10 @@ router.get("/", function(req, res) {
             res.json({ error: err.message });
         } else if(resources) {
             resources.forEach(function (resource) {
-                if (!resource.owner.displayName && !req.session.user.isAdmin && !resource.owner.deleted) {
+                if (!resource.owner.displayName  && !resource.owner.deleted && !req.session.user.isAdmin) {
                     resource.owner.firstName = 'Anonymous';
                     resource.owner.lastName = 'Poster';
-                } else if (resource.owner.deleted) {
+                } else if (resource.owner.deleted && !req.session.user.isAdmin) {
                     resource.owner.firstName = 'Deleted';
                     resrouce.owner.lastName = 'Account';
                 }
@@ -108,7 +107,8 @@ router.put("/:id", function(req, res) {
 router.delete("/:id", function(req, res) {
     Resource.findOne({ _id: req.params.id, owner: req.session.user._id })
     .remove()
-    .exec(function(err, num) {
+    .exec(function(err, obj) {
+        var num = obj.result.n;
         if(err) {
             res.json({ error: err.message });
         } else if(num > 0) {
