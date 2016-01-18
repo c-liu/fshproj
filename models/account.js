@@ -20,7 +20,8 @@ var accountSchema = mongoose.Schema({
 	//DOB
 	dob: {type: Date, required: true}
 	displayDOB: {type: Boolean, required: true}
-
+    // Deleted boolean: to determine whether to hide their info or not.
+    deleted: {tyep: Boolean, required: true},
     image: String,	//URL to the image
     impairment: String,
     sex: String,

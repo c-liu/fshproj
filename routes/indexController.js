@@ -49,10 +49,13 @@ router.post('/login', function(req, res) {
     .exec(function(err, user) {
         if(err) handleError(res, 500, err.message);
         else if(user) {
-            // delete user['password'];
-            req.session.user = user;
-            req.session.save();
-            res.json({success: true, user: user});
+            if (user.deleted) {
+                handleError(res, 403, 'Error: You cannot login to a deleted account.')
+            } else {
+                req.session.user = user;
+                req.session.save();
+                res.json({success: true, user: user});    
+            }
         } else {
             handleError(res, 404, 'Error: Email and password do not match');
         }
@@ -98,7 +101,12 @@ router.post('/signup', function(req,res) {
     Account.findOne({ email: req.body.email }, function(err, user) {
         if(err) handleError(res, 500, err.message);
         else if(user) {
-            res.json({ error: "Error: An account already exists with this email address" });
+            if (user.deleted) {
+                // TODO: Send them an email asking if they want to reactivate the account if it's deleted
+                res.json({ error: "Error: The previous account with this email address was deleted. We assumed no one would ever resign up with the same email. Sorry, try with a new email address" });   
+            } else {
+                res.json({ error: "Error: An account already exists with this email address" });
+            }
         } else {    
             var newUser = new Account({
                 // for easy testing, uncomment 2 lines below
