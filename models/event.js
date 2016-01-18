@@ -4,7 +4,7 @@ var eventSchema = mongoose.Schema({
 	owner: {type: mongoose.Schema.Types.ObjectId, ref: "Account"},
     title: {type: String, required: true},
     dateofevent: Date,
-    location: String,
+    location: String,	// specific address
     description: String,
     image: String,
     approval: {type: Boolean, default: false, required: true}

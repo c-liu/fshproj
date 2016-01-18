@@ -1,40 +1,9 @@
 var mongoose = require("mongoose");
 var uniqueValidator = require('mongoose-unique-validator');
 
-// var nameSchema = mongoose.Schema ({
-// 	first: {
-// 	    type: String, 
-// 	    required: true
-// 	},
-// 	last: { 
-// 	    type: String,
-// 	    required: true
-// 	},
-// 	display: Boolean
-// });
-
-// var Name = mongoose.model("Name", nameSchema);
-
-// var locationSchema = mongoose.Schema ({
-// 	country: String,
-// 	state: String,//if applicable?
-// 	town: String,	
-// 	display: Boolean, 
-// });
-
-// var Location = mongoose.model("Location", locationSchema);
-
-// var dobSchema = mongoose.Schema({
-// 	dateofbirth: Date,
-// 	display: Boolean,
-// });
-
-// var DOB = mongoose.model("DOB", dobSchema);
-
 var accountSchema = mongoose.Schema({
     email: {
-		type: String, 
-		display: Boolean,
+		type: String,
 		required: true,
 		unique: true
     },
@@ -43,14 +12,14 @@ var accountSchema = mongoose.Schema({
     firstName: {type: String, required: true},
     lastName: {type: String, required: true},
     displayName: {type: Boolean, required: true},
-    //Location
+    //Location, lat/long vs address?
 	country: String,
 	state: String,//if applicable?
 	town: String,	
-	displayLocation: Boolean, 
+	displayLocation: Boolean,
 	//DOB
-	dob: Date,
-	displayDOB: Boolean,
+	dob: {type: Date, required: true}
+	displayDOB: {type: Boolean, required: true}
 
     image: String,	//URL to the image
     impairment: String,

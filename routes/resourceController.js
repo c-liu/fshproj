@@ -17,10 +17,6 @@ router.use(function(req, res, next) {
 // Gets all approved resources. Restricts them to the given area if request body is specified.
 router.get("/", function(req, res) {
     var query = {approval: true};
-    if (req.session.user.isAdmin) {
-        //admin should be able to view all resources regardless of approval status
-        query = {}
-    }
 
     Resource.find(query)
     // .where("latitude").gt(req.body.minLatitude || -90)
@@ -57,9 +53,9 @@ router.get("/", function(req, res) {
 router.post("/", function(req, res) {
 
     var resource = new Resource({
-        owner: req.session.user._id,
-        name: req.body.name,
-        location: req.body.location,
+        owner: req.session.user._id,    // required
+        name: req.body.name,    //required
+        location: req.body.location,    //required
         description: req.body.description,
         image: req.body.image || "",
         approval: req.session.user.isAdmin || false
@@ -73,6 +69,8 @@ router.post("/", function(req, res) {
     });
 });
 
+
+//TODO(catliu): Finish PUT/DELETE, then copy over for Events
 // PUT /annotations/<id>
 // Request body: { title: String, text: String, image: Base64, public: Boolean, storyId: ObjectId }
 // Updates an annotation, so long as it belongs to the currently logged-in user.

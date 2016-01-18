@@ -45,7 +45,7 @@ router.post('/login', function(req, res) {
                     .update(req.body.password)
                     .digest('hex');
     Account.findOne({ email: req.body.email, password: encrypted_password})
-    .select("-password") // TODO: Figure out if you want more fields?
+    .select("-password") // TODO(catliu): Figure out if we want to restrict fields?
     .exec(function(err, user) {
         if(err) handleError(res, 500, err.message);
         else if(user) {
@@ -89,41 +89,7 @@ router.post('/login', function(req, res) {
         
 //     });
 // });
-/*
-email: {
-        type: String, 
-        display: Boolean,
-        required: true,
-        unique: true
-    },
-    password : {type: String},
-    // Name
-    firstName: {type: String, required: true},
-    lastName: {type: String, required: true},
-    displayName: {type: Boolean, required: true},
-    //Location
-    country: String,
-    state: String,//if applicable?
-    town: String,   
-    displayLocation: Boolean, 
-    //DOB
-    dob: Date,
-    displayDOB: Boolean,
 
-    image: String,  //URL to the image
-    impairment: String,
-    sex: String,
-    hobbies: String,
-    description: String,
-    approval: { 
-        type: Boolean, 
-        default: false 
-    },
-    isAdmin: {
-        type: Boolean,
-        default: false 
-    }
-*/
 
 // POST /signup
 // Request body: { email: String, password: String, firstName: String, lastName: String, and all optional fields }
@@ -136,11 +102,11 @@ router.post('/signup', function(req,res) {
         } else {    
             var newUser = new Account({
                 // for easy testing, uncomment 2 lines below
-                // approval : true,    
-                // isAdmin : true,
-                firstName: "Test", //required
-                lastName: "Tester", //required
-                displayName: false, //required
+                approval : req.body.approval,    
+                isAdmin : req.body.isAdmin,
+                firstName: req.body.firstName, //required
+                lastName: req.body.lastName, //required
+                displayName: req.body.displayName, //required
                 email : req.body.email, // required
 
             });
@@ -151,7 +117,14 @@ router.post('/signup', function(req,res) {
                     .update(req.body.password)
                     .digest('hex');
             }
-            // if(req.body.name) newUser.name = req.body.name;
+
+            if(req.body.country) newUser.country = req.body.country;
+            if(req.body.state) newUser.state = req.body.state;
+            if(req.body.town) newUser.town = req.body.town;
+            if(req.body.displayLocation || !req.body.displayLocation) newUser.displayLocation = req.body.displayLocation;
+            if(req.body.dob) newUser.dob = req.body.dob;
+            if(req.body.displayDOB || !req.body.displayDOB) newUser.displayDOB = req.body.displayDOB;
+
             if(req.body.image) newUser.image = req.body.image;
             if(req.body.impairment) newUser.impairment = req.body.impairment;
             if(req.body.sex) newUser.sex = req.body.sex;
