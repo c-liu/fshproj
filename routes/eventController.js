@@ -5,7 +5,7 @@ var Event = require("../models/event");
 
 // Require authentication for the rest of the actions
 router.use(function(req, res, next) {
-    if(req.session.user && req.session.user.approval && !req.user.deleted) {
+    if(req.session.user && req.session.user.approval && !req.session.user.deleted) {
         next();
     } else {
         res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
@@ -23,17 +23,17 @@ router.get("/", function(req, res) {
     //.where("longitude").gt(req.body.minLongitude || -180)
     //.where("longitude").lt(req.body.maxLongitude || 180)
 	.populate("owner", "firstName lastName displayName")
-	.exec(function(err, resources) {
+	.exec(function(err, events) {
             if(err) {
 		res.json({ error: err.message });
             } else if(events) {
-		events.forEach(function (resource) {
+		events.forEach(function (event) {
                     if (!event.owner.displayName && !req.session.user.isAdmin) {
 			event.owner.firstName = 'Anonymous'
 			event.owner.lastName = 'Poster'
                     }
 		});
-		res.json(resources);
+		res.json(events);
             } else {
 		res.json({ error: "Error: No resources found" });
             }
@@ -82,7 +82,7 @@ Updates an event, so long as it belongs to the currently logged-in user.
 */
 
 router.put("/:id", function(req, res) {
-    Event.findOne({ _id: req.params.id, author: req.session.user._id }, function(err, event) {
+    Event.findOne({ _id: req.params.id, owner: req.session.user._id }, function(err, event) {
         if(err) {
             res.json({ error: err.message });
         } else if(event) {
@@ -109,9 +109,11 @@ router.put("/:id", function(req, res) {
 // DELETE /events/<id>
 // Deletes the event with the given id, so long as it belongs to the currently logged-in user.
 router.delete("/:id", function(req, res) {
-    Event.findOne({ _id: req.params.id, author: req.session.user._id })
+    Event.findOne({ _id: req.params.id, owner: req.session.user._id })
 	.remove()
-	.exec(function(err, num) {
+	.exec(function(err, obj) {
+        var num = obj.result.n;
+        
             if(err) {
 		res.json({ error: err.message });
             } else if(num > 0) {
