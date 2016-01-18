@@ -116,7 +116,7 @@ router.post('/signup', function(req,res) {
                 lastName: req.body.lastName, //required
                 displayName: req.body.displayName, //required
                 email : req.body.email, // required
-
+                deleted: false
             });
 
             if(req.body.password) {

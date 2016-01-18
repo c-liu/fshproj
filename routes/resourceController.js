@@ -6,6 +6,7 @@ var Resource = require("../models/resource");
 // Require authentication for the rest of the actions
 router.use(function(req, res, next) {
     if(req.session.user && req.session.user.approval && !req.user.deleted) {
+        console.log("not deleted user");
         next();
     } else {
         res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
@@ -74,9 +75,9 @@ router.post("/", function(req, res) {
 
 
 //TODO(catliu): Finish PUT/DELETE, then copy over for Events
-// PUT /annotations/<id>
-// Request body: { title: String, text: String, image: Base64, public: Boolean, storyId: ObjectId }
-// Updates an annotation, so long as it belongs to the currently logged-in user.
+// PUT /resources/<id>
+// Request body: { name: String, location: String, image: String, description: String}
+// Updates an resource, so long as it belongs to the currently logged-in user.
 router.put("/:id", function(req, res) {
     Resource.findOne({ _id: req.params.id, owner: req.session.user._id }, function(err, resource) {
         if(err) {
@@ -105,7 +106,7 @@ router.put("/:id", function(req, res) {
 // DELETE /annotations/<id>
 // Deletes the annotation with the given id, so long as it belongs to the currently logged-in user.
 router.delete("/:id", function(req, res) {
-    Resource.findOne({ _id: req.params.id, author: req.session.user._id })
+    Resource.findOne({ _id: req.params.id, owner: req.session.user._id })
     .remove()
     .exec(function(err, num) {
         if(err) {
@@ -113,7 +114,7 @@ router.delete("/:id", function(req, res) {
         } else if(num > 0) {
             res.json({ success: true });
         } else {
-            res.json({ error: "Error: You do not have permission to edit this annotation" });
+            res.json({ error: "Error: You do not have permission to delete this resource" });
         }
     });
 });
