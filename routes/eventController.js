@@ -49,6 +49,7 @@ router.get("/:id", function(req, res) {
         if (err) handleError(res, 500, err);
         else if (found){
 	    //found event???????
+            res.json(found);
         }
     };
 });

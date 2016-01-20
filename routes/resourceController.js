@@ -102,7 +102,7 @@ router.put("/:id", function(req, res) {
     });
 });
 
-// DELETE /annotations/<id>
+// DELETE /resources/<id>
 // Deletes the annotation with the given id, so long as it belongs to the currently logged-in user.
 router.delete("/:id", function(req, res) {
     Resource.findOne({ _id: req.params.id, owner: req.session.user._id })

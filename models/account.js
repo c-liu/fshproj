@@ -27,7 +27,7 @@ var accountSchema = mongoose.Schema({
     sex: String,
     hobbies: String,
     description: String,
-    research: { type: Boolean, default: false }
+    research: { type: Boolean, default: false },
     approval: { type: Boolean, default: false },
     isAdmin: { type: Boolean,default: false }
 });

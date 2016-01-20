@@ -9,10 +9,10 @@ var Resource = require("../models/resource");
 
 // Require authentication for the rest of the actions
 router.use(function(req, res, next) {
-    if(req.session.user && req.session.user.approval && !req.session.user.deleted) {
+    if(req.session.user && !req.session.user.deleted) {
         next();
     } else {
-        res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
+        res.json({ error: "Error: You must be logged in to perform this action" });
     }
 });
 
@@ -75,7 +75,14 @@ router.put("/:id", function(req, res) {
         }
     });
 });
-
+// Require approval as well for the rest of the actions
+router.use(function(req, res, next) {
+    if(req.session.user && req.session.user.approval && !req.session.user.deleted) {
+        next();
+    } else {
+        res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
+    }
+});
 /*
 GET /accounts/<id>/events
 Gets all user’s events.
@@ -120,6 +127,14 @@ router.get('/:id/resources', function(req,res) {
     }
 });
 
+// Require moderator access as well for the rest of the actions
+router.use(function(req, res, next) {
+    if(req.session.user && req.session.user.approval && !req.session.user.deleted && req.session.user.isAdmin) {
+        next();
+    } else {
+        res.json({ error: "Error: You must be logged in as a mod to perform this action" });
+    }
+});
 /*
 GET /accounts/moderator/pendingresources
 Gets all pending resources
@@ -208,7 +223,7 @@ router.put("/moderator/pendingresources/:id", function(req, res) {
                 }
             });
         } else {
-            res.json({ error: "Error: You do not have permission to edit this resource" });
+            res.json({ error: "Error: Resource not found" });
         }
     });
 });
@@ -217,7 +232,7 @@ router.put("/moderator/pendingresources/:id", function(req, res) {
 // Request body: {TODO}
 // Updates event information and/or changes approval status.
 router.put("/moderator/pendingevents/:id", function(req, res) {
-    Resource.findOne({ _id: req.params.id}, function(err, event) {
+    Event.findOne({ _id: req.params.id}, function(err, event) {
         if(err) {
             res.json({ error: err.message });
         } else if(event) {
@@ -245,11 +260,11 @@ router.put("/moderator/pendingevents/:id", function(req, res) {
 // Request body: {TODO}
 // Change approval status of an account
 router.put("/moderator/pendingaccounts/:id", function(req, res) {
-    Resource.findOne({ _id: req.params.id}, function(err, account) {
+    Account.findOne({ _id: req.params.id}, function(err, account) {
         if(err) {
             res.json({ error: err.message });
         } else if(account) {
-            if (req.body.approval) resource.approval = req.body.approval;
+            if (req.body.approval) account.approval = req.body.approval;
 
             account.save(function(err) {
                 if(err) {
@@ -259,7 +274,7 @@ router.put("/moderator/pendingaccounts/:id", function(req, res) {
                 }
             });
         } else {
-            res.json({ error: "Error: You do not have permission to edit this account" });
+            res.json({ error: "Error: Account not found" });
         }
     });
 });

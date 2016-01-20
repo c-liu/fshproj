@@ -127,6 +127,7 @@ router.post('/signup', function(req,res) {
             }
 
             if(req.body.country) newUser.country = req.body.country;
+            if(req.body.research || !req.body.research) newUser.research = req.body.research;
             if(req.body.state) newUser.state = req.body.state;
             if(req.body.town) newUser.town = req.body.town;
             if(req.body.displayLocation || !req.body.displayLocation) newUser.displayLocation = req.body.displayLocation;
