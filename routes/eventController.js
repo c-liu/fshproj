@@ -39,6 +39,22 @@ router.get("/", function(req, res) {
             }
 	});
 });
+
+// GET /events/<id>
+// Gets event with specified ID.
+router.get("/:id", function(req, res) {
+    var query = {approval: true, _id: req.params.id };
+    Event.findOne(query),
+    function (err, found){
+        if (err) handleError(res, 500, err);
+        else if (found){
+	    //found event???????
+        }
+    };
+});
+
+	   
+
 /* POST /events
 Request body: 
    name: {type: String, required: true},
