@@ -7,13 +7,22 @@ var Account = require("../models/account");
 var Event = require("../models/event");
 var Resource = require("../models/resource");
 
+// Require authentication for the rest of the actions
+router.use(function(req, res, next) {
+    if(req.session.user && req.session.user.approval && !req.session.user.deleted) {
+        next();
+    } else {
+        res.json({ error: "Error: You must be logged in and approved by a mod to perform this action" });
+    }
+});
+
 // GET /accounts/<id>
 // Gets user information by id such as email, first & last name, etc.
 // Response: all user info and display settings
 router.get("/:id", function(req, res) {
     Account.findOne({ _id: req.params.id })
-    .select("email firstName lastName")
-    .exec(function(err, user){
+    .select("-password -deleted -approval")
+    .exec(function(err, account){
         if(err) handleError(res, 500, err.message);
         else if(account) {
             res.json(account);
@@ -38,8 +47,8 @@ router.put("/:id", function(req, res) {
                     .update(req.body.password)
                     .digest('hex');
             }
-
-            if (req.body.displayName) user.displayName = req.body.displayName;
+            console.log(req.body);
+            if (req.body.displayName || !req.body.displayName) user.displayName = req.body.displayName;
 
             if(req.body.country) user.country = req.body.country;
             if(req.body.state) user.state = req.body.state;
@@ -73,8 +82,8 @@ Gets all user’s events.
 */
 router.get('/:id/events', function(req,res) {
     if(req.params.id === req.session.user._id || req.session.user.isAdmin) {
-        Event.find({ author: req.params.id })
-        .populate("author", "-password")
+        Event.find({ owner: req.params.id })
+        .populate("owner", "-password")
         .exec(function(err, events) {
             if(err) {
                 handleError(res, 500, err.message);
@@ -95,7 +104,8 @@ Gets all user’s resources.
 */
 router.get('/:id/resources', function(req,res) {
     if(req.params.id === req.session.user._id || req.session.user.isAdmin) {
-        Resource.find({ author: req.params.id })
+        Resource.find({ owner: req.params.id })
+        .populate("owner", "-password")
         .exec(function(err, resources) {
             if(err) {
                 handleError(res, 500, err.message);
@@ -117,6 +127,7 @@ Gets all pending resources
 router.get('/moderator/pendingresources', function(req,res){
     if(req.session.user.isAdmin) {
         Resource.find({ approval : false })
+        .populate('owner', '-password')
         .exec(function(err, resources) {
             if(err) {
                 handleError(res, 500, err.message);
@@ -138,6 +149,7 @@ Gets all pending events
 router.get('/moderator/pendingevents', function(req,res){
     if(req.session.user.isAdmin) {
         Event.find({ approval : false })
+        .populate('owner', '-password')
         .exec(function(err, events) {
             if(err) {
                 handleError(res, 500, err.message);
@@ -159,6 +171,7 @@ Gets all pending accounts
 router.get('/moderator/pendingaccounts', function(req,res){
     if(req.session.user.isAdmin) {
         Account.find({ approval : false })
+        .populate('owner', '-password')
         .exec(function(err, users) {
             if(err) {
                 handleError(res, 500, err.message);
@@ -250,5 +263,5 @@ router.put("/moderator/pendingaccounts/:id", function(req, res) {
         }
     });
 });
-
+//TODO: add DELETE routes for things that are not approved by the moderator.
 module.exports = router;

@@ -110,7 +110,7 @@ router.post('/signup', function(req,res) {
         } else {    
             var newUser = new Account({
                 // for easy testing, uncomment 2 lines below
-                approval : req.body.approval,    
+                approval : false,    
                 isAdmin : req.body.isAdmin,
                 firstName: req.body.firstName, //required
                 lastName: req.body.lastName, //required
