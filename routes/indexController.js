@@ -130,6 +130,8 @@ router.post('/signup', function(req,res) {
             if(req.body.research || !req.body.research) newUser.research = req.body.research;
             if(req.body.state) newUser.state = req.body.state;
             if(req.body.town) newUser.town = req.body.town;
+            if(req.body.latitude) newUser.latitude = req.body.latitude;
+            if(req.body.longitude) newUser.longitude = req.body.longitude;
             if(req.body.displayLocation || !req.body.displayLocation) newUser.displayLocation = req.body.displayLocation;
             if(req.body.dob) newUser.dob = req.body.dob;
             if(req.body.displayDOB || !req.body.displayDOB) newUser.displayDOB = req.body.displayDOB;

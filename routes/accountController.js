@@ -17,8 +17,42 @@ router.use(function(req, res, next) {
 });
 
 //GET /accounts/
-//gets location of all accounts + all displayable info.
-// TODO(catliu)
+//gets location of all approved accounts + all displayable info.
+router.get("/", function(req, res) {
+    var populateStr = "-password -email";
+    if (req.session.user.isAdmin) {
+        populateStr = "-password"
+    }
+    Account.find({approval:true, deleted:false})
+    .where("latitude").gt(req.body.minLatitude || -90)
+    .where("latitude").lt(req.body.maxLatitude || 90)
+    .where("longitude").gt(req.body.minLongitude || -180)
+    .where("longitude").lt(req.body.maxLongitude || 180)
+    .populate("owner", populateStr)
+    .exec(function(err, accounts) {
+        if(err) {
+            res.json({ error: err.message });
+        } else if(accounts) {
+            accounts.forEach(function (account) {
+                //Anonymize name
+                if (!account.displayName && !req.session.user.isAdmin) {
+                    account.firstName = 'Anonymous';
+                    account.owner.lastName = 'Poster';
+                }
+                if (!account.displayLocation && !req.session.user.isAdmin) {
+                    account.country = '';
+                    account.state = '';
+                    account.town = '';
+                }
+                if (!account.displayDOB && !req.session.user.isAdmin) {
+                    account.dob = undefined
+                }
+            });
+            res.json(accounts);
+        }
+    });
+
+});
 
 // GET /accounts/<id>
 // Gets user information by id such as email, first & last name, etc.
@@ -57,6 +91,8 @@ router.put("/:id", function(req, res) {
             if(req.body.country) user.country = req.body.country;
             if(req.body.state) user.state = req.body.state;
             if(req.body.town) user.town = req.body.town;
+            if(req.body.longitude) user.longitude = req.body.longitude;
+            if(req.body.latitude) user.latitude = req.body.latitude;
             if(req.body.displayLocation || !req.body.displayLocation) user.displayLocation = req.body.displayLocation;
             if(req.body.dob) user.dob = req.body.dob;
             if(req.body.displayDOB || !req.body.displayDOB) user.displayDOB = req.body.displayDOB;
@@ -215,6 +251,9 @@ router.put("/moderator/pending/resources/:id", function(req, res) {
         } else if(resource) {
             if (req.body.name) resource.name = req.body.name;
             if (req.body.location) resource.location = req.body.location;
+            resource.latitude = req.body.latitude || resource.latitude;
+            resource.longitude = req.body.longitude || resource.longitude;
+
             if (req.body.description) resource.description = req.body.description;
             if (req.body.image) resource.image = req.body.image;
             if (req.body.approval) resource.approval = req.body.approval;
@@ -242,6 +281,9 @@ router.put("/moderator/pending/events/:id", function(req, res) {
         } else if(event) {
             if (req.body.name) event.name = req.body.name;
             if (req.body.location) event.location = req.body.location;
+            event.latitude = req.body.latitude || event.latitude;
+            event.longitude = req.body.longitude || event.longitude;
+            
             if (req.body.dateofevent) event.dateofevent = req.body.dateofevent;
             if (req.body.description) event.description = req.body.description;
             if (req.body.image) event.image = req.body.image;
@@ -316,7 +358,7 @@ router.delete("/moderator/pending/events/:id", function(req, res) {
             } else if(num > 0) {
                 res.json({ success: true });
             } else {
-                res.json({ error: "Error: Resource not found for deletion" });
+                res.json({ error: "Error: Event not found for deletion" });
             }
     });
 });
@@ -334,7 +376,7 @@ router.delete("/moderator/pending/accounts/:id", function(req, res) {
             } else if(num > 0) {
                 res.json({ success: true });
             } else {
-                res.json({ error: "Error: Resource not found for deletion" });
+                res.json({ error: "Error: Account not found for deletion" });
             }
     });
 });

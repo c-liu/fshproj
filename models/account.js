@@ -13,6 +13,8 @@ var accountSchema = mongoose.Schema({
     lastName: {type: String, required: true},
     displayName: {type: Boolean, required: true},
     //Location, lat/long vs address?
+    latitude: {type: Number},
+    longitude: {type: Number},
     country: String,
     state: String,//if applicable?
     town: String,	

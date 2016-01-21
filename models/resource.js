@@ -3,6 +3,8 @@ var mongoose = require("mongoose");
 var resourceSchema = mongoose.Schema({
     owner: {type: mongoose.Schema.Types.ObjectId, ref: "Account", required: true},
     name: {type: String, required: true},
+    latitude: {type: Number, required: true},
+    longitude: {type: Number, required: true},
     location: {type: String, required: true}, // specific address
     description: String,
     image: String,

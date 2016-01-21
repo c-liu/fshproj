@@ -18,10 +18,10 @@ router.use(function(req, res, next) {
 router.get("/", function(req, res) {
     var query = {approval: true};
     Event.find(query)
-    //.where("latitude").gt(req.body.minLatitude || -90)
-    //.where("latitude").lt(req.body.maxLatitude || 90)
-    //.where("longitude").gt(req.body.minLongitude || -180)
-    //.where("longitude").lt(req.body.maxLongitude || 180)
+    .where("latitude").gt(req.body.minLatitude || -90)
+    .where("latitude").lt(req.body.maxLatitude || 90)
+    .where("longitude").gt(req.body.minLongitude || -180)
+    .where("longitude").lt(req.body.maxLongitude || 180)
 	.populate("owner", "firstName lastName displayName")
 	.exec(function(err, events) {
             if(err) {
@@ -29,7 +29,7 @@ router.get("/", function(req, res) {
             } else if(events) {
                 events.forEach(function (event) {
                     var now = new Date();
-                    // DELETE any passed events from database
+                    // DELETE any past events from database
                     if(event.end.getTime()<now.getTime()){
                         Event.remove({_id:event._id})
                     }
@@ -82,6 +82,8 @@ router.post("/", function(req, res) {
         name: req.body.name,
         start: req.body.start,
         end: req.body.end,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
         location: req.body.location,
         description: req.body.description,
         image: req.body.image || "",
@@ -118,7 +120,9 @@ router.put("/:id", function(req, res) {
             event.end = req.body.end || event.end;
     	    event.description = req.body.description || event.description;
     	    event.location = req.body.location || event.location;
-    	    event.approval = false;
+            event.latitude = req.body.latitude || event.latitude;
+            event.longitude = req.body.longitude|| event.longitude;
+            event.approval = false;
             event.image = req.body.image || event.image;
   
             event.save(function(err) {

@@ -19,10 +19,10 @@ router.get("/", function(req, res) {
     var query = {approval: true};
 
     Resource.find(query)
-    // .where("latitude").gt(req.body.minLatitude || -90)
-    // .where("latitude").lt(req.body.maxLatitude || 90)
-    // .where("longitude").gt(req.body.minLongitude || -180)
-    // .where("longitude").lt(req.body.maxLongitude || 180)
+    .where("latitude").gt(req.body.minLatitude || -90)
+    .where("latitude").lt(req.body.maxLatitude || 90)
+    .where("longitude").gt(req.body.minLongitude || -180)
+    .where("longitude").lt(req.body.maxLongitude || 180)
     .populate("owner", 'firstName lastName displayName deleted')  //name has display settings to determine whether or not to strip it out
     .exec(function(err, resources) {
         if(err) {
@@ -59,6 +59,8 @@ router.post("/", function(req, res) {
         owner: req.session.user._id,    // required
         name: req.body.name,    //required
         location: req.body.location,    //required
+        latitude: req.body.latitude,    //required
+        longitude: req.body.longitude,    //required
         description: req.body.description,
         image: req.body.image || "",
         approval: req.session.user.isAdmin || false
@@ -83,6 +85,8 @@ router.put("/:id", function(req, res) {
         } else if(resource) {
             resource.name = req.body.name || resource.name;
             resource.location = req.body.location || resource.location;
+            resource.latitude = req.body.latitude || resource.latitude;
+            resource.longitude = req.body.longitude || resource.longitude;
             resource.description = req.body.description || resource.description;
             resource.image = req.body.image || resource.image;
 

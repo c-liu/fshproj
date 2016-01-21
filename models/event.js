@@ -5,6 +5,8 @@ var eventSchema = mongoose.Schema({
     name: {type: String, required: true},
     start: {type: Date, required: true},
     end: {type: Date, required: true},
+    latitude: {type: Number, required: true},
+    longitude: {type: Number, required: true},
     location: {type: String, required: true},	// specific address
     description: String,
     image: String,
