@@ -73,7 +73,6 @@ router.post("/", function(req, res) {
 });
 
 
-//TODO(catliu): Finish PUT/DELETE, then copy over for Events
 // PUT /resources/<id>
 // Request body: { name: String, location: String, image: String, description: String}
 // Updates an resource, so long as it belongs to the currently logged-in user.

@@ -25,17 +25,25 @@ router.get("/", function(req, res) {
 	.populate("owner", "firstName lastName displayName")
 	.exec(function(err, events) {
             if(err) {
-		res.json({ error: err.message });
+        		res.json({ error: err.message });
             } else if(events) {
-		events.forEach(function (event) {
-                    if (!event.owner.displayName && !req.session.user.isAdmin) {
-			event.owner.firstName = 'Anonymous'
-			event.owner.lastName = 'Poster'
+                events.forEach(function (event) {
+                    var now = new Date();
+                    // DELETE any passed events from database
+                    if(event.end.getTime()<now.getTime()){
+                        Event.remove({_id:event._id})
                     }
-		});
-		res.json(events);
+                    else if (!event.owner.displayName  && !event.owner.deleted && !req.session.user.isAdmin) {
+                        event.owner.firstName = 'Anonymous';
+                        event.owner.lastName = 'Poster';
+                    } else if (event.owner.deleted && !req.session.user.isAdmin) {
+                        event.owner.firstName = 'Deleted';
+                        event.owner.lastName = 'Account';
+                    }
+            });
+        		res.json(events);
             } else {
-		res.json({ error: "Error: No resources found" });
+        		res.json({ error: "Error: No resources found" });
             }
 	});
 });
@@ -59,7 +67,8 @@ router.get("/:id", function(req, res) {
 /* POST /events
 Request body: 
    name: {type: String, required: true},
-   dateofevent: {type: Date, required: true},
+   start: {type: Date, required: true},
+   end: {type: Date, required: true},
    location: {type: String, required: true},
    description: String,
    image: String,
@@ -71,7 +80,8 @@ router.post("/", function(req, res) {
     var event = new Event({
         owner: req.session.user._id,
         name: req.body.name,
-        dateofevent: req.body.dateofevent,
+        start: req.body.start,
+        end: req.body.end,
         location: req.body.location,
         description: req.body.description,
         image: req.body.image || "",
@@ -104,10 +114,11 @@ router.put("/:id", function(req, res) {
             res.json({ error: err.message });
         } else if(event) {
             event.name = req.body.name || event.name;
-            event.dateofevent = req.body.dateofevent || event.dateofevent;
-	    event.description = req.body.description || event.description;
-	    event.location = req.body.location || event.location;
-	    event.approval = false;
+            event.start = req.body.start || event.start;
+            event.end = req.body.end || event.end;
+    	    event.description = req.body.description || event.description;
+    	    event.location = req.body.location || event.location;
+    	    event.approval = false;
             event.image = req.body.image || event.image;
   
             event.save(function(err) {

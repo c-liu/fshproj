@@ -109,7 +109,7 @@ router.post('/signup', function(req,res) {
             }
         } else {    
             var newUser = new Account({
-                // for easy testing, uncomment 2 lines below
+                // for easy testing, switch approval to true for initial admin
                 approval : false,    
                 isAdmin : req.body.isAdmin,
                 firstName: req.body.firstName, //required
@@ -159,45 +159,5 @@ router.post('/logout', function(req,res){
         else res.json({success: true});
     });
 });
-
-
-// parses and saves the google plus info into the Users model
-// var savePersonalInfo = function(googlePlusInfo, req, res) {
-//     var firstName = googlePlusInfo.name.givenName;
-//     var lastName = googlePlusInfo.name.familyName;
-//     var email = null;
-
-//     // finds the email associated with the account
-//     for (var i = 0; i < googlePlusInfo.emails.length; i++) {
-//         var emailObject = googlePlusInfo.emails[i];
-//         if (emailObject.type == 'account') {
-//             email = emailObject.value;
-//         }
-//     }
-
-//     // try to find the user
-//     Account.findOne({ email:email }, function (err, user) {
-//         if (err) return handleError(res, 500, err);
-
-//         // create a new user and save the fact that they're new to the session
-//         if (user == undefined) {
-//             var newUser = new User({ 'firstName': firstName, 'lastName': lastName, email: email });
-        
-//             newUser.save(function (err, user) {
-//                 if (err) return handleError(res, 500, err);
-//                 userObject = user;
-//                 //req.session.userIsNew = true;
-//                 req.session.user = user;
-//                 req.session.save();
-//                 res.redirect('/');
-//             });
-
-//         } else {
-//             req.session.user = user;
-//             req.session.save();
-//             res.redirect('/');
-//         }
-//     });
-// }
 
 module.exports = router;

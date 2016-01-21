@@ -16,6 +16,10 @@ router.use(function(req, res, next) {
     }
 });
 
+//GET /accounts/
+//gets location of all accounts + all displayable info.
+// TODO(catliu)
+
 // GET /accounts/<id>
 // Gets user information by id such as email, first & last name, etc.
 // Response: all user info and display settings
@@ -139,7 +143,7 @@ router.use(function(req, res, next) {
 GET /accounts/moderator/pendingresources
 Gets all pending resources
 */
-router.get('/moderator/pendingresources', function(req,res){
+router.get('/moderator/pending/resources', function(req,res){
     if(req.session.user.isAdmin) {
         Resource.find({ approval : false })
         .populate('owner', '-password')
@@ -158,10 +162,10 @@ router.get('/moderator/pendingresources', function(req,res){
 });
 
 /*
-GET /accounts/moderator/pendingevents
+GET /accounts/moderator/pending/events
 Gets all pending events
 */
-router.get('/moderator/pendingevents', function(req,res){
+router.get('/moderator/pending/events', function(req,res){
     if(req.session.user.isAdmin) {
         Event.find({ approval : false })
         .populate('owner', '-password')
@@ -180,10 +184,10 @@ router.get('/moderator/pendingevents', function(req,res){
 });
 
 /*
-GET /accounts/moderator/pendingaccounts
+GET /accounts/moderator/pending/accounts
 Gets all pending accounts
 */
-router.get('/moderator/pendingaccounts', function(req,res){
+router.get('/moderator/pending/accounts', function(req,res){
     if(req.session.user.isAdmin) {
         Account.find({ approval : false })
         .populate('owner', '-password')
@@ -201,10 +205,10 @@ router.get('/moderator/pendingaccounts', function(req,res){
     }
 });
 
-// PUT /accounts/moderator/pendingresources
+// PUT /accounts/moderator/pending/resources
 // Request body: {TODO}
 // Updates resource information and/or changes approval status.
-router.put("/moderator/pendingresources/:id", function(req, res) {
+router.put("/moderator/pending/resources/:id", function(req, res) {
     Resource.findOne({ _id: req.params.id}, function(err, resource) {
         if(err) {
             res.json({ error: err.message });
@@ -228,10 +232,10 @@ router.put("/moderator/pendingresources/:id", function(req, res) {
     });
 });
 
-// PUT /accounts/moderator/pendingevents
+// PUT /accounts/moderator/pending/events
 // Request body: {TODO}
 // Updates event information and/or changes approval status.
-router.put("/moderator/pendingevents/:id", function(req, res) {
+router.put("/moderator/pending/events/:id", function(req, res) {
     Event.findOne({ _id: req.params.id}, function(err, event) {
         if(err) {
             res.json({ error: err.message });
@@ -256,10 +260,10 @@ router.put("/moderator/pendingevents/:id", function(req, res) {
     });
 });
 
-// PUT /accounts/moderator/pendingaccounts
+// PUT /accounts/moderator/pending/accounts
 // Request body: {TODO}
 // Change approval status of an account
-router.put("/moderator/pendingaccounts/:id", function(req, res) {
+router.put("/moderator/pending/accounts/:id", function(req, res) {
     Account.findOne({ _id: req.params.id}, function(err, account) {
         if(err) {
             res.json({ error: err.message });
@@ -278,5 +282,61 @@ router.put("/moderator/pendingaccounts/:id", function(req, res) {
         }
     });
 });
-//TODO: add DELETE routes for things that are not approved by the moderator.
+
+
+
+// DELETE /accounts/moderator/pending/resources
+// Request body: {TODO}
+// Updates resource information and/or changes approval status.
+router.delete("/moderator/pending/resources/:id", function(req, res) {
+    Resource.findOne({ _id: req.params.id})
+        .remove()
+        .exec(function(err, obj) {
+            var num = obj.result.n;
+            if(err) {
+                res.json({ error: err.message });
+            } else if(num > 0) {
+                res.json({ success: true });
+            } else {
+                res.json({ error: "Error: Resource not found for deletion" });
+            }
+    });
+});
+
+// DELETE /accounts/moderator/pending/events
+// Request body: {TODO}
+// Updates resource information and/or changes approval status.
+router.delete("/moderator/pending/events/:id", function(req, res) {
+    Event.findOne({ _id: req.params.id})
+        .remove()
+        .exec(function(err, obj) {
+            var num = obj.result.n;
+            if(err) {
+                res.json({ error: err.message });
+            } else if(num > 0) {
+                res.json({ success: true });
+            } else {
+                res.json({ error: "Error: Resource not found for deletion" });
+            }
+    });
+});
+
+// DELETE /accounts/moderator/pending/accounts
+// Request body: {TODO}
+// Updates resource information and/or changes approval status.
+router.delete("/moderator/pending/accounts/:id", function(req, res) {
+    Account.findOne({ _id: req.params.id})
+        .remove()
+        .exec(function(err, obj) {
+            var num = obj.result.n;
+            if(err) {
+                res.json({ error: err.message });
+            } else if(num > 0) {
+                res.json({ success: true });
+            } else {
+                res.json({ error: "Error: Resource not found for deletion" });
+            }
+    });
+});
+
 module.exports = router;
