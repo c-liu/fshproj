@@ -28,7 +28,7 @@ router.get("/", function(req, res) {
             _id: "invalid"
         };
     }
-    res.render('map', {
+    res.render('fsh', {
         userId: req.session.user._id,
         userEmail: req.session.user.email,
         firstName: req.session.user.firstName,
