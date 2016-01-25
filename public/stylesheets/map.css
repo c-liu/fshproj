@@ -101,13 +101,12 @@ body {
 	font-size: 40px;
 	color: #D7EDFC;
 	position: relative;
-	margin: 0 20px;
-	float: left;
-	/*width: 80%;*/
+	width: 100%;
 }
 
-#mappyLogo{
-	width: 300px;
+#fshBanner{
+	display: block;
+    margin: 0 auto;
 }
 
 #storyTitleHeader{
