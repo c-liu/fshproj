@@ -17,12 +17,16 @@ router.use(function(req, res, next) {
 // Gets all approved events. Restricts them to the given area if request body is specified.
 router.get("/", function(req, res) {
     var query = {approval: true};
+    var populateStr = "displayName deleted";
+    if (req.session.user.isAdmin) {
+        populateStr = "firstName lastName displayName"
+    }
     Event.find(query)
     .where("latitude").gt(req.body.minLatitude || -90)
     .where("latitude").lt(req.body.maxLatitude || 90)
     .where("longitude").gt(req.body.minLongitude || -180)
     .where("longitude").lt(req.body.maxLongitude || 180)
-	.populate("owner", "firstName lastName displayName")
+	.populate("owner", populateStr)
 	.exec(function(err, events) {
             if(err) {
         		res.json({ error: err.message });
@@ -33,12 +37,8 @@ router.get("/", function(req, res) {
                     if(event.end.getTime()<now.getTime()){
                         Event.remove({_id:event._id})
                     }
-                    else if (!event.owner.displayName  && !event.owner.deleted && !req.session.user.isAdmin) {
-                        event.owner.firstName = 'Anonymous';
-                        event.owner.lastName = 'Poster';
-                    } else if (event.owner.deleted && !req.session.user.isAdmin) {
-                        event.owner.firstName = 'Deleted';
-                        event.owner.lastName = 'Account';
+                    else if (event.owner.deleted && !req.session.user.isAdmin) {
+                        event.owner.displayName = 'Deleted account'
                     }
             });
         		res.json(events);

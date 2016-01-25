@@ -11,14 +11,13 @@ var accountSchema = mongoose.Schema({
     // Name
     firstName: {type: String, required: true},
     lastName: {type: String, required: true},
-    displayName: {type: Boolean, required: true},
+    displayName: {type: String, required: true},
     //Location, lat/long vs address?
-    latitude: {type: Number},
-    longitude: {type: Number},
+    latitude: {type: Number, required: true},
+    longitude: {type: Number,required: true},
     country: String,
     state: String,//if applicable?
-    town: String,	
-    displayLocation: Boolean,
+    town: String,
     //DOB: are there legal requirements for under 13 or something(USA only)?
     dob: {type: Date},
     displayDOB: {type: Boolean},

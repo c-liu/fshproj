@@ -19,31 +19,24 @@ router.use(function(req, res, next) {
 //GET /accounts/
 //gets location of all approved accounts + all displayable info.
 router.get("/", function(req, res) {
-    var populateStr = "-password -email";
+    var query = {approval:true, deleted:false};
+    var populateStr = "-password -email -firstName -lastName";
     if (req.session.user.isAdmin) {
         populateStr = "-password"
+        query = {approval: true};
     }
-    Account.find({approval:true, deleted:false})
+    Account.find(query)
     .where("latitude").gt(req.body.minLatitude || -90)
     .where("latitude").lt(req.body.maxLatitude || 90)
     .where("longitude").gt(req.body.minLongitude || -180)
     .where("longitude").lt(req.body.maxLongitude || 180)
-    .populate("owner", populateStr)
+    .select(populateStr)
     .exec(function(err, accounts) {
+        console.log(populateStr, accounts);
         if(err) {
             res.json({ error: err.message });
         } else if(accounts) {
             accounts.forEach(function (account) {
-                //Anonymize name
-                if (!account.displayName && !req.session.user.isAdmin) {
-                    account.firstName = 'Anonymous';
-                    account.owner.lastName = 'Poster';
-                }
-                if (!account.displayLocation && !req.session.user.isAdmin) {
-                    account.country = '';
-                    account.state = '';
-                    account.town = '';
-                }
                 if (!account.displayDOB && !req.session.user.isAdmin) {
                     account.dob = undefined
                 }
@@ -85,8 +78,9 @@ router.put("/:id", function(req, res) {
                     .update(req.body.password)
                     .digest('hex');
             }
-            console.log(req.body);
-            if (req.body.displayName || !req.body.displayName) user.displayName = req.body.displayName;
+            if (req.body.displayName) user.displayName = req.body.displayName;
+            if (req.body.firstName) user.firstName = req.body.firstName;
+            if (req.body.lastName) user.lastName = req.body.lastName;
 
             if(req.body.country) user.country = req.body.country;
             if(req.body.state) user.state = req.body.state;

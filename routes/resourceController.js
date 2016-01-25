@@ -17,24 +17,24 @@ router.use(function(req, res, next) {
 // Gets all approved resources. Restricts them to the given area if request body is specified.
 router.get("/", function(req, res) {
     var query = {approval: true};
+    var populateStr = "displayName deleted";
+    if (req.session.user.isAdmin) {
+        populateStr = "firstName lastName displayName deleted"
+    }
 
     Resource.find(query)
     .where("latitude").gt(req.body.minLatitude || -90)
     .where("latitude").lt(req.body.maxLatitude || 90)
     .where("longitude").gt(req.body.minLongitude || -180)
     .where("longitude").lt(req.body.maxLongitude || 180)
-    .populate("owner", 'firstName lastName displayName deleted')  //name has display settings to determine whether or not to strip it out
+    .populate("owner", populateStr)  //name has display settings to determine whether or not to strip it out
     .exec(function(err, resources) {
         if(err) {
             res.json({ error: err.message });
         } else if(resources) {
             resources.forEach(function (resource) {
-                if (!resource.owner.displayName  && !resource.owner.deleted && !req.session.user.isAdmin) {
-                    resource.owner.firstName = 'Anonymous';
-                    resource.owner.lastName = 'Poster';
-                } else if (resource.owner.deleted && !req.session.user.isAdmin) {
-                    resource.owner.firstName = 'Deleted';
-                    resrouce.owner.lastName = 'Account';
+                if (resource.owner.deleted && !req.session.user.isAdmin) {
+                    resource.owner.displayName = "Deleted account"
                 }
             });
             res.json(resources);
