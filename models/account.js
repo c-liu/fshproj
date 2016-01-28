@@ -19,7 +19,7 @@ var accountSchema = mongoose.Schema({
     state: String,//if applicable?
     town: String,
     //DOB: are there legal requirements for under 13 or something(USA only)?
-    dob: {type: Date},
+    dob: {type: Number},
     displayDOB: {type: Boolean},
     // Deleted boolean: to determine whether to hide their info or not.
     deleted: {type: Boolean, required: true},
