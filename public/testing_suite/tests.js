@@ -1,4 +1,5 @@
-// primary author: Catherine
+// primary author: 
+// TODO: Configure some automated API tests. Can use the templates below as an example.
 var userId = $("#qunit").attr("userId");
 //QUnit.config.reorder = false;
 function ajax (params, url, restType, testName, success) {
