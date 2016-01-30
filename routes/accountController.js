@@ -87,7 +87,6 @@ router.put("/:id", function(req, res) {
             if(req.body.town) user.town = req.body.town;
             if(req.body.longitude) user.longitude = req.body.longitude;
             if(req.body.latitude) user.latitude = req.body.latitude;
-            if(req.body.displayLocation || !req.body.displayLocation) user.displayLocation = req.body.displayLocation;
             if(req.body.dob) user.dob = req.body.dob;
             if(req.body.displayDOB || !req.body.displayDOB) user.displayDOB = req.body.displayDOB;
 

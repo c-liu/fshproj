@@ -23,11 +23,6 @@ router.get("/", function(req, res) {
             displayName : 'Temporary Guest'
         };
     }
-    if (!req.session.story){
-        req.session.story = {
-            _id: "invalid"
-        };
-    }
     res.render('fsh', {
         userId: req.session.user._id,
         userEmail: req.session.user.email,
@@ -61,37 +56,6 @@ router.post('/login', function(req, res) {
         }
     });
 });
-
-// GET /login/google
-// Redirects to Google for authentication
-// router.get('/login/google', function(req, res){
-//     // generate a url that asks permissions for Google Calendar and Email address scopes
-//     var scopes = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/plus.me'];
-//     var url = oauth2Client.generateAuthUrl({
-//         access_type : 'offline', // 'online' (default) or 'offline' (gets refresh_token)
-//         scope       : scopes // If you only need one scope you can pass it as string
-//     });
-
-//     res.redirect(url);
-// });
-
-// Google will redirect to this link upon oauth acceptance
-// router.get('/oauthcallback', function(req, res){
-//     var code = req.query.code;
-//     oauth2Client.getToken(code, function(err, tokens) {
-
-//         // Now tokens contains an access_token and an optional refresh_token. Save them.
-//         if (err) return handleError(res, 500, err);
-//         oauth2Client.setCredentials(tokens);
-
-//         // user is now logged in. Using token to get personal info
-//         plus.people.get({userId:'me', auth:oauth2Client}, function(err, googlePlusInfo) {
-//             if (err) return handleError(res, 500, err);
-//             savePersonalInfo(googlePlusInfo, req, res);
-//         });
-        
-//     });
-// });
 
 
 // POST /signup
@@ -132,7 +96,6 @@ router.post('/signup', function(req,res) {
             if(req.body.research || !req.body.research) newUser.research = req.body.research;
             if(req.body.state) newUser.state = req.body.state;
             if(req.body.town) newUser.town = req.body.town;
-            if(req.body.displayLocation || !req.body.displayLocation) newUser.displayLocation = req.body.displayLocation;
             if(req.body.dob) newUser.dob = req.body.dob;
             if(req.body.displayDOB || !req.body.displayDOB) newUser.displayDOB = req.body.displayDOB;
 
